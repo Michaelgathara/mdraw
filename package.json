@@ -1,66 +1,47 @@
 {
-  "name": "webapp-template",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "@chakra-ui/react": "^2.8.2",
-    "@emotion/react": "^11.11.3",
-    "@emotion/styled": "^11.11.0",
-    "@excalidraw/excalidraw": "^0.17.6",
-    "@mui/icons-material": "^5.15.3",
-    "@mui/material": "^5.15.3",
-    "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
-    "bootstrap": "^5.3.0",
-    "fabric": "^5.5.1",
-    "framer-motion": "^4.1.17",
-    "jspdf": "^3.0.0",
-    "next": "^14.2.4",
-    "react": "^18.3.1",
-    "react-bootstrap": "^2.8.0",
-    "react-dom": "^18.3.1",
-    "react-markdown": "^9.0.0",
-    "react-modal-image": "^2.6.0",
-    "react-pdf": "^9.2.1",
-    "react-router": "^6.14.1",
-    "react-router-dom": "^6.14.1",
-    "react-scripts": "^5.0.1",
-    "typescript": "^4.9.5",
-    "uuid": "^11.1.0",
-    "web-vitals": "^2.1.4",
-    "zustand": "^5.0.3"
+  "name": "mdraw",
+  "version": "0.5.0",
+  "description": "Open Source Paginated Drawing",
+  "main": "postcss.config.js",
+  "directories": {
+    "test": "tests"
   },
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "serve": "serve -s ./dist"
+    "lint": "next lint"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/michaelgathara/mdraw.git"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "keywords": [
+    "drawing"
+  ],
+  "author": "Michael Gathara",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/michaelgathara/mdraw/issues"
+  },
+  "homepage": "https://github.com/michaelgathara/mdraw#readme",
+  "dependencies": {
+    "@excalidraw/excalidraw": "^0.17.6",
+    "@tailwindcss/postcss": "^4.0.9",
+    "fabric": "^5.5.1",
+    "jspdf": "^3.0.0",
+    "next": "^15.2.0",
+    "react-pdf": "^9.2.1",
+    "tailwindcss": "^4.0.9",
+    "uuid": "^11.1.0",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@types/fabric": "^5.3.10",
+    "@types/node": "22.13.8",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
     "@types/uuid": "^10.0.0",
-    "tailwindcss": "^3.3.5"
-  },
-  "overrides": {
-    "react-refresh": "0.11.0"
+    "typescript": "5.8.2"
   }
 }
