@@ -1,0 +1,23 @@
+services:
+  frontend:
+    image: jpyles0524/webapp-template:latest
+    build:
+      context: .
+      dockerfile: ./docker/frontend/Dockerfile
+    container_name: frontend
+    command: ["npm", "run", "start"]
+    ports:
+      - "3000:3000" 
+    networks:
+      - web
+  backend:
+    build:
+      context: .
+      dockerfile: ./docker/backend/Dockerfile
+    container_name: backend
+    ports:
+      - "8000:8000"
+    networks:
+      - web
+networks:
+  web:

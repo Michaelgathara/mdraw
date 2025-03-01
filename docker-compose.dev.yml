@@ -1,0 +1,9 @@
+version: "3"
+services:
+  frontend:
+    volumes:
+      - "$PWD/src:/project/src"
+    command: ["npm", "run", "dev"]
+  backend:
+    volumes:
+      - "$PWD/api:/project/api"

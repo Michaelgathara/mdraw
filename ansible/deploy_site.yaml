@@ -1,0 +1,10 @@
+- name: Deploy site
+  hosts: all
+  become: true
+  vars_files:
+    - ./config.yaml
+  tasks:
+    - name: Deploy
+      command: "{{deploy_command}}"
+      args:
+        chdir: "{{deploy_path}}"
