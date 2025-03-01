@@ -5,9 +5,19 @@ import { useRef, useEffect, useState } from 'react';
 import { fabric } from 'fabric';
 import useStore, { Element } from '@/lib/store/useStore';
 
+// Declare this outside the component to prevent redefinition 
+// in useEffect closures with each render
+let isDrawing = false;
+let startX = 0;
+let startY = 0;
+let currentObj: fabric.Object | null = null;
+let freehandPoints: Array<{x: number, y: number}> = [];
+
 export default function PageCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<fabric.Canvas | null>(null);
+  // Add a client-side only flag
+  const [isMounted, setIsMounted] = useState(false);
   
   const {
     getCurrentPage,
@@ -22,9 +32,14 @@ export default function PageCanvas() {
     clearSelection
   } = useStore();
   
+  // Set mounted flag only on client
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+  
   // Initialize the fabric.js canvas
   useEffect(() => {
-    if (!canvasRef.current) return;
+    if (!isMounted || !canvasRef.current) return;
     
     const canvas = new fabric.Canvas(canvasRef.current, {
       backgroundColor: 'white',
@@ -39,7 +54,7 @@ export default function PageCanvas() {
     return () => {
       canvas.dispose();
     };
-  }, []);
+  }, [isMounted]);
   
   // Sync canvas size with current page
   useEffect(() => {
@@ -59,6 +74,15 @@ export default function PageCanvas() {
   // Sync elements from state to canvas
   useEffect(() => {
     if (!fabricCanvas) return;
+    
+    // Clear the canvas but preserve active drawing object if any
+    const tempObj = currentObj;
+    
+    // Remember the currently active object ID if there is one
+    let activeObjectId = null;
+    if (fabricCanvas.getActiveObject()) {
+      activeObjectId = fabricCanvas.getActiveObject().elementId;
+    }
     
     // Clear the canvas
     fabricCanvas.clear();
@@ -170,11 +194,26 @@ export default function PageCanvas() {
         fabricObj.set('selectable', currentTool === 'select');
         fabricObj.set('selected', selectedElementIds.includes(element.id));
         
+        // Set hover cursor
+        fabricObj.hoverCursor = currentTool === 'select' ? 'move' : 'default';
+        
         fabricCanvas.add(fabricObj);
+        
+        // If this was the active object, reselect it
+        if (activeObjectId && activeObjectId === element.id && currentTool === 'select') {
+          fabricCanvas.setActiveObject(fabricObj);
+        }
       }
     });
     
-    fabricCanvas.renderAll();
+    // Add back the temporary object if we're drawing
+    if (isDrawing && tempObj) {
+      fabricCanvas.add(tempObj);
+      currentObj = tempObj;
+    }
+    
+    // Force render
+    fabricCanvas.requestRenderAll();
     
   }, [fabricCanvas, getCurrentPage, currentTool, selectedElementIds]);
   
@@ -205,13 +244,13 @@ export default function PageCanvas() {
     // Set all objects selectable status
     fabricCanvas.forEachObject((obj) => {
       obj.selectable = currentTool === 'select';
+      obj.hoverCursor = currentTool === 'select' ? 'move' : 'default';
     });
     
-    let isDrawing = false;
-    let startX = 0;
-    let startY = 0;
-    let currentObj: fabric.Object | null = null;
-    let freehandPoints: Array<{x: number, y: number}> = [];
+    // Reset drawing state when tool changes
+    isDrawing = false;
+    currentObj = null;
+    freehandPoints = [];
     
     // Handle mouse down
     fabricCanvas.on('mouse:down', (opt) => {
@@ -233,11 +272,13 @@ export default function PageCanvas() {
           currentObj = new fabric.Rect({
             left: startX,
             top: startY,
-            width: 0,
-            height: 0,
+            width: 1, // Start with small size instead of 0 to make visible immediately
+            height: 1,
             fill: currentFill,
             stroke: currentStroke,
-            strokeWidth: currentStrokeWidth
+            strokeWidth: currentStrokeWidth,
+            selectable: false, // Prevent selection during drawing
+            hoverCursor: 'default'
           });
           break;
           
@@ -245,18 +286,22 @@ export default function PageCanvas() {
           currentObj = new fabric.Circle({
             left: startX,
             top: startY,
-            radius: 0,
+            radius: 1, // Start with small radius instead of 0
             fill: currentFill,
             stroke: currentStroke,
-            strokeWidth: currentStrokeWidth
+            strokeWidth: currentStrokeWidth,
+            selectable: false,
+            hoverCursor: 'default'
           });
           break;
           
         case 'line':
         case 'arrow':
-          currentObj = new fabric.Line([startX, startY, startX, startY], {
+          currentObj = new fabric.Line([startX, startY, startX + 1, startY + 1], { // Small line initially
             stroke: currentStroke,
-            strokeWidth: currentStrokeWidth
+            strokeWidth: currentStrokeWidth,
+            selectable: false,
+            hoverCursor: 'default'
           });
           break;
           
@@ -269,14 +314,20 @@ export default function PageCanvas() {
           currentObj = new fabric.Path(`M ${startX} ${startY}`, {
             stroke: currentStroke,
             strokeWidth: currentStrokeWidth,
-            fill: 'transparent'
+            fill: 'transparent',
+            selectable: false,
+            hoverCursor: 'default'
           });
           break;
       }
       
       if (currentObj) {
+        // Ensure the object is rendered on top during drawing
         fabricCanvas.add(currentObj);
-        fabricCanvas.renderAll();
+        currentObj.bringToFront();
+        
+        // Force immediate rendering to show the object
+        fabricCanvas.requestRenderAll();
       }
     });
     
@@ -331,15 +382,31 @@ export default function PageCanvas() {
         case 'freehand':
           freehandPoints.push({ x: pointer.x, y: pointer.y });
           
+          // Create a new path with the updated points
           const path = freehandPoints.map((point, i) => 
             i === 0 ? `M ${point.x} ${point.y}` : `L ${point.x} ${point.y}`
           ).join(' ');
           
-          (currentObj as fabric.Path).set({ path });
+          // For freehand, it's better to recreate the path object each time
+          // to ensure smooth rendering of the ongoing drawing
+          if (currentObj) {
+            fabricCanvas.remove(currentObj);
+          }
+          
+          currentObj = new fabric.Path(path, {
+            stroke: currentStroke,
+            strokeWidth: currentStrokeWidth,
+            fill: 'transparent',
+            selectable: false,
+            hoverCursor: 'default'
+          });
+          
+          fabricCanvas.add(currentObj);
           break;
       }
       
-      fabricCanvas.renderAll();
+      // Force canvas to re-render immediately to show the shape being drawn
+      fabricCanvas.requestRenderAll();
     });
     
     // Handle mouse up
@@ -364,10 +431,35 @@ export default function PageCanvas() {
         });
         
         fabricCanvas.add(currentObj);
-        fabricCanvas.renderAll();
+        fabricCanvas.requestRenderAll();
       }
       
+      // Check if the object is too small (likely an accidental click)
+      // This prevents creating tiny shapes when users just click without dragging
+      let isTooSmall = false;
+      
       if (currentObj) {
+        if (currentTool === 'rectangle' || currentTool === 'circle') {
+          const width = currentObj.width || 0;
+          const height = currentObj.height || 0;
+          if (width < 5 && height < 5) {
+            isTooSmall = true;
+          }
+        } else if (currentTool === 'line' || currentTool === 'arrow') {
+          const line = currentObj as fabric.Line;
+          const dx = (line.x2 || 0) - (line.x1 || 0);
+          const dy = (line.y2 || 0) - (line.y1 || 0);
+          if (Math.sqrt(dx * dx + dy * dy) < 5) {
+            isTooSmall = true;
+          }
+        } else if (currentTool === 'freehand') {
+          if (freehandPoints.length < 3) {
+            isTooSmall = true;
+          }
+        }
+      }
+      
+      if (currentObj && !isTooSmall) {
         // Add the element to our state
         const fabricObject = currentObj;
         const elementType = currentTool;
@@ -396,8 +488,8 @@ export default function PageCanvas() {
           case 'line':
           case 'arrow':
             const line = fabricObject as fabric.Line;
-            elementData.width = line.width || 0;
-            elementData.height = line.height || 0;
+            elementData.width = Math.abs((line.x2 || 0) - (line.x1 || 0));
+            elementData.height = Math.abs((line.y2 || 0) - (line.y1 || 0));
             break;
             
           case 'text':
@@ -412,13 +504,20 @@ export default function PageCanvas() {
             break;
         }
         
-        addElement(elementData);
-        
-        // Remove the temporary object, it will be re-added from state
+        // Remove the temporary object first
         fabricCanvas.remove(currentObj);
-        currentObj = null;
-        freehandPoints = [];
+        
+        // Then add the permanent element to the store
+        // This order prevents flickering
+        addElement(elementData);
+      } else if (currentObj) {
+        // Just remove the object if it's too small
+        fabricCanvas.remove(currentObj);
       }
+      
+      // Reset drawing state
+      currentObj = null;
+      freehandPoints = [];
     });
     
     // Handle selection events

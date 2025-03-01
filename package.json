@@ -2,7 +2,8 @@
   "name": "mdraw",
   "version": "0.5.0",
   "description": "Open Source Paginated Drawing",
-  "main": "postcss.config.js",
+  "main": "postcss.config.mjs",
+  "type": "module",
   "directories": {
     "test": "tests"
   },
