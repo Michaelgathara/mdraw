@@ -1,68 +1,78 @@
-# Webapp Template
+# PageDraw
 
-Template designed to quickly build full stack apps.
+A page-based diagramming tool built with Next.js that allows for PDF export. This project was entirely done with Claude 3.7 Sonnet - I wrote none of the code myself
 
-Utilizes Github Actions and Ansible to build Docker images to quickly deploy onto an AWS EC2 Debian instance.
+## Features
 
-## Technologies
+- **Page-based Canvas System**: Create diagrams on discrete pages rather than an infinite canvas
+- **Drawing Tools**: Rectangle, circle, line, arrow, text, and freehand drawing
+- **Styling Options**: Customize colors, stroke width, and more
+- **Page Management**: Add, remove, and navigate between pages
+- **Export to PDF**: Export your entire project as a PDF
 
-- Containerization: Docker/Docker Compose
+## Tech Stack
 
-- Frontend: React/Next.js
+- **Frontend**: Next.js 14 with TypeScript and App Router
+- **Styling**: TailwindCSS
+- **State Management**: Zustand
+- **Canvas Rendering**: Fabric.js
+- **PDF Generation**: jsPDF
 
-- Backend: FastAPI
+## Getting Started
 
-- Frameworks/Libraries: PDM, TailwindCSS
+1. **Clone the repository**
 
-## Prerequisites
-
-- Install Ansible
-
-- Create a Dockerhub account/repo and fill out the Github repo environmental variables:
-
-  - DOCKERHUB_TOKEN
-  - DOCKERHUB_USERNAME
-  - DOCKERHUB_REPO
-
-- Complete the `config.yaml` and the `inventory.yaml` in the `ansible` directory
-
-  - `github_repo`: Github repo clone address
-  - `deploy_path`: Path where to clone the repo to on the server
-  - `deploy_command`: `Make` command to run to deploy on the server
-
-- Add your domain in HOSTNAME_PROD in the `Makefile`
-
-## Deployment
-
-### Local Deployment
-
-Uses `make` to quickly dispatch `docker-compose` commands.
-
-- `deps`: rebuilds the frontend to deploy statically using the api
-
-- `build`: builds the container using `docker-compose build `
-
-- `up-prd`: ups the container using `docker-compose -f docker-compose.yml up`
-
-- `up-dev`: ups the container using `docker-compose -f docker-compose.yml -f docker-compose.dev.yml up`
-  which will deploy with local volumes.
-
-Ex: `make deps build up-dev`
-
-### Server Deployment
-
-Easy deployment using `make setup deploy` after completing the required config files.
-
-- `setup`: Install dependencies and clone repo onto server
-
-- `deploy`: Deploy on server
-
-To use a SSL certificate, uncomment the volumes under the `traefik` service. Add your own certificates for use in Traefik.
-
-```yaml
-volumes:
-  - "/var/run/docker.sock:/var/run/docker.sock:ro"
-  - "./dynamic_conf.yaml:/etc/traefik/dynamic_conf.yaml"
-  - "/etc/letsencrypt/live/domain/fullchain.pem:/etc/certs/ssl-cert.pem"
-  - "/etc/letsencrypt/live/domain/privkey.pem:/etc/certs/ssl-cert.key"
+```bash
+git clone https://github.com/yourusername/pagedraw.git
+cd pagedraw
 ```
+
+2. **Install dependencies**
+
+```bash
+npm install
+```
+
+3. **Run the development server**
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## Project Structure
+
+```
+src/
+├── app/                  # Next.js App Router
+│   ├── editor/           # Editor page
+│   ├── projects/         # Projects listing page
+│   ├── layout.tsx        # Root layout
+│   └── page.tsx          # Home page
+├── components/           # React components
+│   ├── canvas/           # Canvas-related components
+│   └── ui/               # UI components
+├── lib/                  # Utilities and helpers
+│   ├── store/            # Zustand store
+│   └── utils/            # Utility functions
+```
+
+## Key Components
+
+- **PageCanvas**: The main drawing canvas component using Fabric.js
+- **EditorToolbar**: The toolbar with drawing tools and export options
+- **PageNavigation**: Component for managing and navigating between pages
+- **PDF Export**: Utility for exporting the project to PDF
+
+## Development Roadmap
+
+- [ ] Implement undo/redo functionality
+- [ ] Add collaboration features
+- [ ] Create templates system
+- [ ] Add image import support
+- [ ] Implement advanced connectors with anchor points
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
