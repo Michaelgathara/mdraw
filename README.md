@@ -2,6 +2,11 @@
 
 A page-based diagramming tool built with Next.js that allows for PDF export. This project was entirely done with Claude 3.7 Sonnet - I wrote none of the code myself
 
+## Claude Prompt:
+```
+I want a platform like exacalidraw but with pages and not an infinite canvas, use NextJS and make it possible to export the pages as pdf, start by listing features we want and a plan to implement
+```
+
 ## Features
 
 - **Page-based Canvas System**: Create diagrams on discrete pages rather than an infinite canvas
