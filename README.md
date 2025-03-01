@@ -23,8 +23,8 @@ A page-based diagramming tool built with Next.js that allows for PDF export. Thi
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/yourusername/pagedraw.git
-cd pagedraw
+git clone https://github.com/Michaelgathara/mdraw.git
+cd mdraw
 ```
 
 2. **Install dependencies**
