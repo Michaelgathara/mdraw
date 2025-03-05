@@ -1,6 +1,8 @@
 # PageDraw
 
-A page-based diagramming tool built with Next.js that allows for PDF export. This project was entirely done with Claude 3.7 Sonnet - I wrote none of the code myself
+A page-based diagramming tool built with Next.js that allows for PDF export. This project was entirely done with Claude 3.7 Sonnet - I wrote none of the code myself.
+
+![main_page](readme_images/main_page.png)
 
 ## Claude Prompt:
 ```
@@ -10,6 +12,7 @@ I want a platform like exacalidraw but with pages and not an infinite canvas, us
 ## Features
 
 - **Page-based Canvas System**: Create diagrams on discrete pages rather than an infinite canvas
+![editor_page](readme_images/editor_page.png)
 - **Drawing Tools**: Rectangle, circle, line, arrow, text, and freehand drawing
 - **Styling Options**: Customize colors, stroke width, and more
 - **Page Management**: Add, remove, and navigate between pages
@@ -70,7 +73,7 @@ src/
 - **PageNavigation**: Component for managing and navigating between pages
 - **PDF Export**: Utility for exporting the project to PDF
 
-## Development Roadmap
+## Potential Roadmap
 
 - [ ] Implement undo/redo functionality
 - [ ] Add collaboration features
