@@ -31,7 +31,7 @@
     "@tailwindcss/postcss": "^4.0.9",
     "fabric": "^5.5.1",
     "jspdf": "^3.0.0",
-    "next": "^15.2.0",
+    "next": "^15.2.3",
     "react-pdf": "^9.2.1",
     "tailwindcss": "^4.0.9",
     "uuid": "^11.1.0",
